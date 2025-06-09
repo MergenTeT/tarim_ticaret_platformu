@@ -1,50 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'base_view_model.dart';
+import 'package:go_router/go_router.dart';
 
-class BaseView<T extends BaseViewModel> extends StatefulWidget {
-  final Widget Function(BuildContext context, T value, Widget? child) onPageBuilder;
-  final T viewModel;
-  final Function(T model)? onModelReady;
-  final VoidCallback? onDispose;
+class BaseView extends StatefulWidget {
+  final Widget child;
+  final String title;
+  final List<Widget>? actions;
+  final bool showBottomNav;
 
   const BaseView({
     Key? key,
-    required this.viewModel,
-    required this.onPageBuilder,
-    this.onModelReady,
-    this.onDispose,
+    required this.child,
+    required this.title,
+    this.actions,
+    this.showBottomNav = true,
   }) : super(key: key);
 
   @override
-  _BaseViewState<T> createState() => _BaseViewState<T>();
+  State<BaseView> createState() => _BaseViewState();
 }
 
-class _BaseViewState<T extends BaseViewModel> extends State<BaseView<T>> {
-  late T model;
-
-  @override
-  void initState() {
-    model = widget.viewModel;
-    if (widget.onModelReady != null) widget.onModelReady!(model);
-    model.init();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    if (widget.onDispose != null) widget.onDispose!();
-    model.dispose();
-    super.dispose();
-  }
+class _BaseViewState extends State<BaseView> {
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: model,
-      child: Consumer<T>(
-        builder: widget.onPageBuilder,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: widget.actions,
       ),
+      body: widget.child,
+      bottomNavigationBar: widget.showBottomNav
+          ? NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (int index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+                switch (index) {
+                  case 0:
+                    context.go('/market');
+                    break;
+                  case 1:
+                    context.go('/listings');
+                    break;
+                  case 2:
+                    context.go('/messages');
+                    break;
+                  case 3:
+                    context.go('/profile');
+                    break;
+                }
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.store),
+                  label: 'Pazar',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.list),
+                  label: 'İlanlarım',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.message),
+                  label: 'Mesajlar',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person),
+                  label: 'Profil',
+                ),
+              ],
+            )
+          : null,
     );
   }
 } 
