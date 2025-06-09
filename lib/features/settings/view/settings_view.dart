@@ -1,55 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:proje_app/core/base/base_view.dart';
+import 'package:gap/gap.dart';
 
 class SettingsView extends StatelessWidget {
-  const SettingsView({Key? key}) : super(key: key);
+  const SettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BaseView(
-      title: 'Ayarlar',
-      showBottomNav: false,
-      child: ListView(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ayarlar'),
+      ),
+      body: ListView(
         children: [
+          ListTile(
+            leading: const Icon(Icons.person_outline),
+            title: const Text('Profil Bilgileri'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.pushNamed(context, '/profile'),
+          ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
             title: const Text('Bildirim Ayarları'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to notification settings
-            },
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.security_outlined),
+            title: const Text('Güvenlik'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.language_outlined),
-            title: const Text('Dil Seçenekleri'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to language settings
-            },
+            title: const Text('Dil'),
+            trailing: const Text('Türkçe'),
+            onTap: () {},
           ),
-          ListTile(
-            leading: const Icon(Icons.lock_outline),
-            title: const Text('Gizlilik ve Güvenlik'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to privacy settings
-            },
-          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.help_outline),
-            title: const Text('Yardım ve Destek'),
+            title: const Text('Yardım & Destek'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to help and support
-            },
+            onTap: () {},
           ),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text('Hakkında'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // TODO: Navigate to about
-            },
+            onTap: () {},
+          ),
+          const Gap(16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: OutlinedButton(
+              onPressed: () {
+                // TODO: Implement logout
+              },
+              child: const Text('Çıkış Yap'),
+            ),
           ),
         ],
       ),
