@@ -29,7 +29,16 @@ mixin _$User {
   bool get isOnline => throw _privateConstructorUsedError;
   String? get profileImage => throw _privateConstructorUsedError;
   List<String> get favoriteListings => throw _privateConstructorUsedError;
+  @TimestampConverter()
   DateTime? get lastSeen => throw _privateConstructorUsedError;
+  @TimestampConverter()
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  @TimestampConverter()
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
+  String? get phoneNumber => throw _privateConstructorUsedError;
+  String? get city => throw _privateConstructorUsedError;
+  String? get deviceToken => throw _privateConstructorUsedError;
+  bool get notificationsEnabled => throw _privateConstructorUsedError;
 
   /// Serializes this User to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,7 +63,13 @@ abstract class $UserCopyWith<$Res> {
     bool isOnline,
     String? profileImage,
     List<String> favoriteListings,
-    DateTime? lastSeen,
+    @TimestampConverter() DateTime? lastSeen,
+    @TimestampConverter() DateTime? createdAt,
+    @TimestampConverter() DateTime? updatedAt,
+    String? phoneNumber,
+    String? city,
+    String? deviceToken,
+    bool notificationsEnabled,
   });
 }
 
@@ -82,6 +97,12 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
     Object? profileImage = freezed,
     Object? favoriteListings = null,
     Object? lastSeen = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+    Object? phoneNumber = freezed,
+    Object? city = freezed,
+    Object? deviceToken = freezed,
+    Object? notificationsEnabled = null,
   }) {
     return _then(
       _value.copyWith(
@@ -121,6 +142,30 @@ class _$UserCopyWithImpl<$Res, $Val extends User>
                 ? _value.lastSeen
                 : lastSeen // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            createdAt: freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            phoneNumber: freezed == phoneNumber
+                ? _value.phoneNumber
+                : phoneNumber // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            city: freezed == city
+                ? _value.city
+                : city // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            deviceToken: freezed == deviceToken
+                ? _value.deviceToken
+                : deviceToken // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            notificationsEnabled: null == notificationsEnabled
+                ? _value.notificationsEnabled
+                : notificationsEnabled // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -144,7 +189,13 @@ abstract class _$$UserImplCopyWith<$Res> implements $UserCopyWith<$Res> {
     bool isOnline,
     String? profileImage,
     List<String> favoriteListings,
-    DateTime? lastSeen,
+    @TimestampConverter() DateTime? lastSeen,
+    @TimestampConverter() DateTime? createdAt,
+    @TimestampConverter() DateTime? updatedAt,
+    String? phoneNumber,
+    String? city,
+    String? deviceToken,
+    bool notificationsEnabled,
   });
 }
 
@@ -169,6 +220,12 @@ class __$$UserImplCopyWithImpl<$Res>
     Object? profileImage = freezed,
     Object? favoriteListings = null,
     Object? lastSeen = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
+    Object? phoneNumber = freezed,
+    Object? city = freezed,
+    Object? deviceToken = freezed,
+    Object? notificationsEnabled = null,
   }) {
     return _then(
       _$UserImpl(
@@ -208,6 +265,30 @@ class __$$UserImplCopyWithImpl<$Res>
             ? _value.lastSeen
             : lastSeen // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        createdAt: freezed == createdAt
+            ? _value.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        phoneNumber: freezed == phoneNumber
+            ? _value.phoneNumber
+            : phoneNumber // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        city: freezed == city
+            ? _value.city
+            : city // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        deviceToken: freezed == deviceToken
+            ? _value.deviceToken
+            : deviceToken // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        notificationsEnabled: null == notificationsEnabled
+            ? _value.notificationsEnabled
+            : notificationsEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -215,7 +296,7 @@ class __$$UserImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$UserImpl implements _User {
+class _$UserImpl extends _User {
   const _$UserImpl({
     required this.id,
     required this.email,
@@ -225,8 +306,15 @@ class _$UserImpl implements _User {
     this.isOnline = false,
     this.profileImage,
     final List<String> favoriteListings = const [],
-    this.lastSeen,
-  }) : _favoriteListings = favoriteListings;
+    @TimestampConverter() this.lastSeen,
+    @TimestampConverter() this.createdAt,
+    @TimestampConverter() this.updatedAt,
+    this.phoneNumber,
+    this.city,
+    this.deviceToken,
+    this.notificationsEnabled = true,
+  }) : _favoriteListings = favoriteListings,
+       super._();
 
   factory _$UserImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserImplFromJson(json);
@@ -257,11 +345,27 @@ class _$UserImpl implements _User {
   }
 
   @override
+  @TimestampConverter()
   final DateTime? lastSeen;
+  @override
+  @TimestampConverter()
+  final DateTime? createdAt;
+  @override
+  @TimestampConverter()
+  final DateTime? updatedAt;
+  @override
+  final String? phoneNumber;
+  @override
+  final String? city;
+  @override
+  final String? deviceToken;
+  @override
+  @JsonKey()
+  final bool notificationsEnabled;
 
   @override
   String toString() {
-    return 'User(id: $id, email: $email, name: $name, primaryRole: $primaryRole, secondaryRole: $secondaryRole, isOnline: $isOnline, profileImage: $profileImage, favoriteListings: $favoriteListings, lastSeen: $lastSeen)';
+    return 'User(id: $id, email: $email, name: $name, primaryRole: $primaryRole, secondaryRole: $secondaryRole, isOnline: $isOnline, profileImage: $profileImage, favoriteListings: $favoriteListings, lastSeen: $lastSeen, createdAt: $createdAt, updatedAt: $updatedAt, phoneNumber: $phoneNumber, city: $city, deviceToken: $deviceToken, notificationsEnabled: $notificationsEnabled)';
   }
 
   @override
@@ -285,7 +389,18 @@ class _$UserImpl implements _User {
               _favoriteListings,
             ) &&
             (identical(other.lastSeen, lastSeen) ||
-                other.lastSeen == lastSeen));
+                other.lastSeen == lastSeen) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt) &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.city, city) || other.city == city) &&
+            (identical(other.deviceToken, deviceToken) ||
+                other.deviceToken == deviceToken) &&
+            (identical(other.notificationsEnabled, notificationsEnabled) ||
+                other.notificationsEnabled == notificationsEnabled));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -301,6 +416,12 @@ class _$UserImpl implements _User {
     profileImage,
     const DeepCollectionEquality().hash(_favoriteListings),
     lastSeen,
+    createdAt,
+    updatedAt,
+    phoneNumber,
+    city,
+    deviceToken,
+    notificationsEnabled,
   );
 
   /// Create a copy of User
@@ -317,7 +438,7 @@ class _$UserImpl implements _User {
   }
 }
 
-abstract class _User implements User {
+abstract class _User extends User {
   const factory _User({
     required final String id,
     required final String email,
@@ -327,8 +448,15 @@ abstract class _User implements User {
     final bool isOnline,
     final String? profileImage,
     final List<String> favoriteListings,
-    final DateTime? lastSeen,
+    @TimestampConverter() final DateTime? lastSeen,
+    @TimestampConverter() final DateTime? createdAt,
+    @TimestampConverter() final DateTime? updatedAt,
+    final String? phoneNumber,
+    final String? city,
+    final String? deviceToken,
+    final bool notificationsEnabled,
   }) = _$UserImpl;
+  const _User._() : super._();
 
   factory _User.fromJson(Map<String, dynamic> json) = _$UserImpl.fromJson;
 
@@ -349,7 +477,22 @@ abstract class _User implements User {
   @override
   List<String> get favoriteListings;
   @override
+  @TimestampConverter()
   DateTime? get lastSeen;
+  @override
+  @TimestampConverter()
+  DateTime? get createdAt;
+  @override
+  @TimestampConverter()
+  DateTime? get updatedAt;
+  @override
+  String? get phoneNumber;
+  @override
+  String? get city;
+  @override
+  String? get deviceToken;
+  @override
+  bool get notificationsEnabled;
 
   /// Create a copy of User
   /// with the given fields replaced by the non-null parameter values.
