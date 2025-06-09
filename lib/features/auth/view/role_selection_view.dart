@@ -157,7 +157,7 @@ class _RoleSelectionViewState extends ConsumerState<RoleSelectionView> {
       setState(() => _isLoading = true);
 
       // Update user role
-      await ref.read(authViewModelProvider.notifier).updateUserRole(selectedRole!);
+      await ref.read(authViewModelProvider.notifier).updateRole(selectedRole!);
 
       if (mounted) {
         // Show success message

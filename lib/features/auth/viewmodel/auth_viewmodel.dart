@@ -18,7 +18,29 @@ class AuthViewModel extends StateNotifier<AsyncValue<app.User>> {
   AuthViewModel({
     required this.auth,
     required this.firestore,
-  }) : super(AsyncValue.data(app.User.empty()));
+  }) : super(const AsyncValue.loading()) {
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      final user = auth.currentUser;
+      if (user == null) {
+        state = AsyncValue.data(app.User.empty());
+        return;
+      }
+
+      final doc = await firestore.collection('users').doc(user.uid).get();
+      if (!doc.exists) {
+        state = AsyncValue.data(app.User.empty());
+        return;
+      }
+
+      state = AsyncValue.data(app.User.fromJson(doc.data()!));
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 
   Future<void> register({
     required String email,
@@ -58,71 +80,6 @@ class AuthViewModel extends StateNotifier<AsyncValue<app.User>> {
     }
   }
 
-  Future<void> updateUserRole(UserRole selectedRole) async {
-    try {
-      state = const AsyncValue.loading();
-      
-      final currentUser = auth.currentUser;
-      if (currentUser == null) throw Exception('No authenticated user found');
-
-      final now = Timestamp.now();
-
-      // Update Firestore document
-      await firestore.collection('users').doc(currentUser.uid).update({
-        'primaryRole': selectedRole.toString().split('.').last,
-        'updatedAt': now,
-      });
-
-      // Update local state
-      final userData = await firestore.collection('users').doc(currentUser.uid).get();
-      if (userData.exists) {
-        final updatedUser = app.User.fromJson(userData.data()!);
-        state = AsyncValue.data(updatedUser);
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
-    }
-  }
-
-  Future<void> updateUserProfile({
-    String? name,
-    String? phoneNumber,
-    String? city,
-    String? deviceToken,
-    bool? notificationsEnabled,
-  }) async {
-    try {
-      state = const AsyncValue.loading();
-      
-      final currentUser = auth.currentUser;
-      if (currentUser == null) throw Exception('No authenticated user found');
-
-      final updates = <String, dynamic>{
-        'updatedAt': Timestamp.now(),
-      };
-
-      if (name != null) updates['name'] = name;
-      if (phoneNumber != null) updates['phoneNumber'] = phoneNumber;
-      if (city != null) updates['city'] = city;
-      if (deviceToken != null) updates['deviceToken'] = deviceToken;
-      if (notificationsEnabled != null) updates['notificationsEnabled'] = notificationsEnabled;
-
-      // Update Firestore document
-      await firestore.collection('users').doc(currentUser.uid).update(updates);
-
-      // Update local state
-      final userData = await firestore.collection('users').doc(currentUser.uid).get();
-      if (userData.exists) {
-        final updatedUser = app.User.fromJson(userData.data()!);
-        state = AsyncValue.data(updatedUser);
-      }
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
-    }
-  }
-
   Future<void> login({
     required String email,
     required String password,
@@ -136,24 +93,41 @@ class AuthViewModel extends StateNotifier<AsyncValue<app.User>> {
         password: password,
       );
 
-      // Update online status and last seen
-      await firestore.collection('users').doc(userCredential.user!.uid).update({
+      // Get user data from Firestore
+      final doc = await firestore.collection('users').doc(userCredential.user!.uid).get();
+      if (!doc.exists) {
+        throw Exception('User data not found');
+      }
+
+      final user = app.User.fromJson(doc.data()!);
+      
+      // Update last seen
+      await firestore.collection('users').doc(user.id).update({
         'isOnline': true,
         'lastSeen': Timestamp.now(),
       });
 
-      // Get user data from Firestore
-      final userData = await firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
+      state = AsyncValue.data(user);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      rethrow;
+    }
+  }
 
-      if (userData.exists) {
-        final user = app.User.fromJson(userData.data()!);
-        state = AsyncValue.data(user);
-      } else {
-        throw Exception('User data not found');
-      }
+  Future<void> updateRole(UserRole role) async {
+    try {
+      final currentState = state;
+      if (currentState is! AsyncData<app.User>) return;
+      
+      final user = currentState.value;
+      if (user.id.isEmpty) return;
+
+      await firestore.collection('users').doc(user.id).update({
+        'primaryRole': role.name,
+        'updatedAt': Timestamp.now(),
+      });
+
+      state = AsyncValue.data(user.copyWith(primaryRole: role));
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       rethrow;
@@ -162,15 +136,17 @@ class AuthViewModel extends StateNotifier<AsyncValue<app.User>> {
 
   Future<void> logout() async {
     try {
-      final currentUser = auth.currentUser;
-      if (currentUser != null) {
-        // Update online status and last seen before logging out
-        await firestore.collection('users').doc(currentUser.uid).update({
+      final currentState = state;
+      if (currentState is! AsyncData<app.User>) return;
+      
+      final user = currentState.value;
+      if (user.id.isNotEmpty) {
+        await firestore.collection('users').doc(user.id).update({
           'isOnline': false,
           'lastSeen': Timestamp.now(),
         });
       }
-      
+
       await auth.signOut();
       state = AsyncValue.data(app.User.empty());
     } catch (e, st) {

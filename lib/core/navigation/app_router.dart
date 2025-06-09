@@ -6,6 +6,9 @@ import '../../features/auth/view/role_selection_view.dart';
 import '../../features/market/view/market_view.dart';
 import '../../features/messages/view/messages_view.dart';
 import '../../features/listings/view/add_listing_view.dart';
+import '../../features/listings/view/product_detail_view.dart';
+import '../../features/listings/model/product_model.dart';
+import '../../features/chat/view/chat_view.dart';
 import '../../features/stock_market/view/stock_market_view.dart';
 import '../../features/settings/view/settings_view.dart';
 import '../../features/splash/view/splash_view.dart';
@@ -49,6 +52,20 @@ final class AppRouter {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsView(),
+      ),
+      GoRoute(
+        path: '/product/:id',
+        builder: (context, state) {
+          final product = state.extra as ProductModel;
+          return ProductDetailView(product: product);
+        },
+      ),
+      GoRoute(
+        path: '/chat/:userId',
+        builder: (context, state) {
+          final userId = state.pathParameters['userId']!;
+          return ChatView(userId: userId);
+        },
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

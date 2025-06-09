@@ -1,356 +1,140 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/enums/product_category.dart';
-import '../viewmodel/market_viewmodel.dart';
-import '../model/product_model.dart';
+import '../../../features/listings/viewmodel/product_viewmodel.dart';
+import '../../../features/listings/model/product_model.dart';
+import '../../../core/base/base_view.dart';
 
 class MarketView extends HookConsumerWidget {
   const MarketView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final productsState = ref.watch(marketViewModelProvider);
+    final productsState = ref.watch(productsProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
-    final searchQuery = ref.watch(searchQueryProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.eco,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-            const Gap(8),
-            Text(
-              'Tarım Pazarı',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
+    return BaseView(
+      title: 'Pazar',
+      actions: [
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.search),
         ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(180),
-          child: Column(
-            children: [
-              // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: SearchBar(
-                  leading: const Icon(Icons.search),
-                  hintText: 'Ürün ara...',
-                  onChanged: (value) {
-                    ref.read(searchQueryProvider.notifier).state = value;
-                    ref.read(marketViewModelProvider.notifier).loadProducts(
-                          category: selectedCategory,
-                          searchQuery: value,
-                        );
-                  },
-                ),
-              ),
-              // Detailed Filters
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    FilledButton.icon(
-                      onPressed: () {
-                        // TODO: Show filter dialog
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => const FilterBottomSheet(),
-                        );
-                      },
-                      icon: const Icon(Icons.filter_list),
-                      label: const Text('Filtrele'),
-                    ),
-                    const Gap(8),
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.location_on_outlined),
-                      label: const Text('Konum'),
-                    ),
-                    const Gap(8),
-                    OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.sort),
-                      label: const Text('Sırala'),
-                    ),
-                  ],
-                ),
-              ),
-              // Category List
-              SizedBox(
-                height: 60,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  itemCount: ProductCategory.values.length,
-                  itemBuilder: (context, index) {
-                    final category = ProductCategory.values[index];
-                    final isSelected = selectedCategory == category;
-                    
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: FilterChip(
-                        selected: isSelected,
-                        label: Text(category.title),
-                        onSelected: (selected) {
-                          ref.read(selectedCategoryProvider.notifier).state =
-                              selected ? category : null;
-                          ref.read(marketViewModelProvider.notifier).loadProducts(
-                                category: selected ? category : null,
-                                searchQuery: searchQuery,
-                              );
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.notifications_outlined),
         ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(marketViewModelProvider.notifier).refreshProducts(),
-        child: productsState.when(
-          data: (products) {
-            if (products.isEmpty) {
-              // Örnek ürünler oluştur
-              final demoProducts = [
-                ProductModel(
-                  id: '1',
-                  sellerId: 'seller1',
-                  title: 'Organik Elma',
-                  description: 'Amasya elması, taze ve organik',
-                  price: 24.99,
-                  category: ProductCategory.fruits.title,
-                  unit: 'kg',
-                  quantity: 100,
-                  images: ['https://picsum.photos/200'],
-                  createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
-                  location: 'Amasya',
-                ),
-                ProductModel(
-                  id: '2',
-                  sellerId: 'seller2',
-                  title: 'Taze Domates',
-                  description: 'Antalya serası, sofralık domates',
-                  price: 19.99,
-                  category: ProductCategory.vegetables.title,
-                  unit: 'kg',
-                  quantity: 50,
-                  images: ['https://picsum.photos/201'],
-                  createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
-                  location: 'Antalya',
-                ),
-                ProductModel(
-                  id: '3',
-                  sellerId: 'seller3',
-                  title: 'Çiçek Balı',
-                  description: 'Karadeniz yaylalarından doğal bal',
-                  price: 450,
-                  category: ProductCategory.honey.title,
-                  unit: 'kg',
-                  quantity: 10,
-                  images: ['https://picsum.photos/202'],
-                  createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
-                  location: 'Rize',
-                ),
-              ];
-
-              return GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
-                itemCount: demoProducts.length,
-                itemBuilder: (context, index) {
-                  final product = demoProducts[index];
-                  return ProductCard(product: product);
-                },
-              );
-            }
-
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-              ),
-              itemCount: products.length,
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return ProductCard(product: product);
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stackTrace) => Center(
-            child: Text('Hata: $error'),
-          ),
-        ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        height: 65,
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.store),
-            label: 'Pazar',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.trending_up),
-            label: 'Borsa',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.add_box),
-            label: 'İlan Ekle',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.message),
-            label: 'Mesajlar',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Ayarlar',
-          ),
-        ],
-        selectedIndex: 0,
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              break; // Already in market
-            case 1:
-              Navigator.pushNamed(context, '/stock-market');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/add-listing');
-              break;
-            case 3:
-              Navigator.pushNamed(context, '/messages');
-              break;
-            case 4:
-              Navigator.pushNamed(context, '/settings');
-              break;
-          }
-        },
-      ),
-    );
-  }
-}
-
-class FilterBottomSheet extends StatelessWidget {
-  const FilterBottomSheet({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
+      ],
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Filtrele',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          const Divider(),
-          const Text('Fiyat Aralığı'),
-          const Gap(8),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Min',
-                    suffixText: '₺',
-                    border: OutlineInputBorder(),
+          // Kategori filtreleme
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                ActionChip(
+                  label: const Text('Tümü'),
+                  onPressed: () => ref.read(selectedCategoryProvider.notifier).state = null,
+                  backgroundColor: selectedCategory == null
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                  labelStyle: TextStyle(
+                    color: selectedCategory == null
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : null,
                   ),
-                  keyboardType: TextInputType.number,
                 ),
-              ),
-              const Gap(16),
-              Expanded(
-                child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Max',
-                    suffixText: '₺',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-            ],
-          ),
-          const Gap(16),
-          const Text('Konum'),
-          const Gap(8),
-          const TextField(
-            decoration: InputDecoration(
-              labelText: 'Şehir seçin',
-              prefixIcon: Icon(Icons.location_on_outlined),
-              border: OutlineInputBorder(),
+                const Gap(8),
+                ...ProductCategory.values.map((category) {
+                  final isSelected = selectedCategory == category.title;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ActionChip(
+                      label: Text(category.title),
+                      onPressed: () => ref.read(selectedCategoryProvider.notifier).state = category.title,
+                      backgroundColor: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : null,
+                      ),
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
-          const Gap(16),
-          const Text('Sıralama'),
-          const Gap(8),
-          SegmentedButton(
-            segments: const [
-              ButtonSegment(
-                value: 'newest',
-                label: Text('En Yeni'),
+          // İlan listesi
+          Expanded(
+            child: productsState.when(
+              data: (products) {
+                debugPrint('Ürünler yüklendi: ${products.length} adet');
+                products.forEach((product) {
+                  debugPrint('Ürün: ${product.title} - Aktif: ${product.isActive}');
+                });
+
+                if (products.isEmpty) {
+                  return const Center(
+                    child: Text('Henüz ilan bulunmuyor'),
+                  );
+                }
+
+                // Kategoriye göre filtrele
+                final filteredProducts = selectedCategory != null
+                    ? products.where((p) => p.category == selectedCategory).toList()
+                    : products;
+
+                if (filteredProducts.isEmpty) {
+                  return const Center(
+                    child: Text('Bu kategoride ilan bulunmuyor'),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    ref.invalidate(productsProvider);
+                  },
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.75,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                    ),
+                    itemCount: filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = filteredProducts[index];
+                      return ProductCard(product: product);
+                    },
+                  ),
+                );
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
               ),
-              ButtonSegment(
-                value: 'price_asc',
-                label: Text('Fiyat ↑'),
-              ),
-              ButtonSegment(
-                value: 'price_desc',
-                label: Text('Fiyat ↓'),
-              ),
-            ],
-            selected: const {'newest'},
-            onSelectionChanged: (values) {},
-          ),
-          const Gap(24),
-          FilledButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Uygula'),
+              error: (error, stackTrace) {
+                debugPrint('Hata: $error');
+                debugPrint('Stack trace: $stackTrace');
+                return Center(
+                  child: Text('Hata: $error'),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 }
+
+// Seçili kategori için provider
+final selectedCategoryProvider = StateProvider<String?>((ref) => null);
 
 class ProductCard extends StatelessWidget {
   final ProductModel product;
@@ -366,75 +150,88 @@ class ProductCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          // TODO: Navigate to product detail
+          context.push('/product/${product.id}', extra: product);
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.network(
-                    product.images.first,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: Colors.grey[200],
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 48,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
+            // İlan türü etiketi
+            Container(
+              width: double.infinity,
+              color: product.isSellOffer
+                  ? Colors.green.withOpacity(0.1)
+                  : Colors.blue.withOpacity(0.1),
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                product.isSellOffer ? 'SATILIK' : 'ARANIYOR',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: product.isSellOffer ? Colors.green : Colors.blue,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
                 ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      product.location ?? '',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Başlık
                   Text(
                     product.title,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    maxLines: 1,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const Gap(4),
+                  const Gap(8),
+                  // Fiyat
                   Text(
-                    '${product.price} ₺/${product.unit}',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    '₺${product.price.toStringAsFixed(2)} / ${product.unit}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const Gap(4),
+                  // Miktar
                   Text(
-                    product.description,
+                    'Miktar: ${product.quantity} ${product.unit}',
                     style: Theme.of(context).textTheme.bodySmall,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Gap(4),
+                  // Konum
+                  if (product.location != null) ...[
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        const Gap(4),
+                        Expanded(
+                          child: Text(
+                            product.location!,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const Gap(4),
+                  // Tarih
+                  Text(
+                    _formatDate(product.createdAt),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
                   ),
                 ],
               ),
@@ -443,5 +240,24 @@ class ProductCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays > 7) {
+      return '${date.day}/${date.month}/${date.year}';
+    } else if (difference.inDays > 0) {
+      return '${difference.inDays} gün önce';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} saat önce';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} dakika önce';
+    } else {
+      return 'Az önce';
+    }
   }
 } 

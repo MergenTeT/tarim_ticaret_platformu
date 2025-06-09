@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Kullanıcı doğrulaması için yardımcı fonksiyon
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Kullanıcının kendi dokümanını kontrol etmesi için yardımcı fonksiyon
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Users koleksiyonu için kurallar
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+
+    // Products koleksiyonu için kurallar
+    match /products/{productId} {
+      allow read: if true; // Herkes okuyabilir
+      allow create: if isAuthenticated(); // Giriş yapmış kullanıcılar ilan ekleyebilir
+      allow update, delete: if isAuthenticated() && 
+        isOwner(resource.data.sellerId); // Sadece ilan sahibi güncelleyebilir/silebilir
+    }
+  }
+} 

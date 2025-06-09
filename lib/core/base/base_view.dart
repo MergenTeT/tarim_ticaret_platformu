@@ -6,6 +6,7 @@ class BaseView extends StatefulWidget {
   final String title;
   final List<Widget>? actions;
   final bool showBottomNav;
+  final Widget? bottomNavigationBar;
 
   const BaseView({
     Key? key,
@@ -13,6 +14,7 @@ class BaseView extends StatefulWidget {
     required this.title,
     this.actions,
     this.showBottomNav = true,
+    this.bottomNavigationBar,
   }) : super(key: key);
 
   @override
@@ -30,7 +32,7 @@ class _BaseViewState extends State<BaseView> {
         actions: widget.actions,
       ),
       body: widget.child,
-      bottomNavigationBar: widget.showBottomNav
+      bottomNavigationBar: widget.bottomNavigationBar ?? (widget.showBottomNav
           ? NavigationBar(
               selectedIndex: _selectedIndex,
               onDestinationSelected: (int index) {
@@ -42,13 +44,16 @@ class _BaseViewState extends State<BaseView> {
                     context.go('/market');
                     break;
                   case 1:
-                    context.go('/listings');
+                    context.go('/stock-market');
                     break;
                   case 2:
-                    context.go('/messages');
+                    context.go('/add-listing');
                     break;
                   case 3:
-                    context.go('/profile');
+                    context.go('/messages');
+                    break;
+                  case 4:
+                    context.go('/settings');
                     break;
                 }
               },
@@ -58,20 +63,24 @@ class _BaseViewState extends State<BaseView> {
                   label: 'Pazar',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.list),
-                  label: 'İlanlarım',
+                  icon: Icon(Icons.trending_up),
+                  label: 'Borsa',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.add_box),
+                  label: 'İlan Ekle',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.message),
                   label: 'Mesajlar',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.person),
-                  label: 'Profil',
+                  icon: Icon(Icons.settings),
+                  label: 'Ayarlar',
                 ),
               ],
             )
-          : null,
+          : null),
     );
   }
 } 

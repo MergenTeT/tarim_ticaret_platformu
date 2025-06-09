@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
+import '../../../core/base/base_view.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ayarlar'),
-      ),
-      body: ListView(
+    return BaseView(
+      title: 'Ayarlar',
+      child: ListView(
         children: [
           ListTile(
             leading: const Icon(Icons.person_outline),
             title: const Text('Profil Bilgileri'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.pushNamed(context, '/profile'),
+            onTap: () => context.go('/profile'),
           ),
           ListTile(
             leading: const Icon(Icons.notifications_outlined),
