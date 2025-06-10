@@ -329,7 +329,12 @@ class ProductDetailView extends HookConsumerWidget {
                                     width: double.infinity,
                                     child: FilledButton.icon(
                                       onPressed: () {
-                                        context.push('/chat/${product.sellerId}');
+                                        context.push('/messages', extra: {
+                                          'userId': product.sellerId,
+                                          'userName': product.sellerName,
+                                          'productId': product.id,
+                                          'productTitle': product.title,
+                                        });
                                       },
                                       icon: const Icon(Icons.message),
                                       label: const Text('Mesaj Gönder'),

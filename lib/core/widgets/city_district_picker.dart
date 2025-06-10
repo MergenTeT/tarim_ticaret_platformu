@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import '../models/city_model.dart';
 
 class CityDistrictPicker extends StatefulWidget {
@@ -52,9 +51,16 @@ class _CityDistrictPickerState extends State<CityDistrictPicker> {
         // İl Seçimi
         DropdownButtonFormField<String>(
           value: _selectedCity,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'İl',
-            border: OutlineInputBorder(),
+            hintText: 'İl seçin',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
           items: widget.cities
               .map((city) => DropdownMenuItem(
@@ -78,14 +84,25 @@ class _CityDistrictPickerState extends State<CityDistrictPicker> {
             }
             return null;
           },
+          icon: const Icon(Icons.location_city),
+          isExpanded: true,
+          dropdownColor: Theme.of(context).colorScheme.surface,
         ),
-        const Gap(16),
+        const SizedBox(height: 16),
         // İlçe Seçimi
         DropdownButtonFormField<String>(
           value: _selectedDistrict,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'İlçe',
-            border: OutlineInputBorder(),
+            hintText: _selectedCity == null ? 'Önce il seçin' : 'İlçe seçin',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            enabled: _selectedCity != null,
           ),
           items: _districts
               .map((district) => DropdownMenuItem(
@@ -109,6 +126,9 @@ class _CityDistrictPickerState extends State<CityDistrictPicker> {
             }
             return null;
           },
+          icon: const Icon(Icons.location_on),
+          isExpanded: true,
+          dropdownColor: Theme.of(context).colorScheme.surface,
         ),
       ],
     );

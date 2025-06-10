@@ -25,9 +25,20 @@ class AddListingView extends HookConsumerWidget {
     return authState.when(
       data: (user) {
         if (user.id.isEmpty) {
-          return const Scaffold(
-            body: Center(
-              child: Text('Lütfen giriş yapın'),
+          return BaseView(
+            title: 'İlan Ekle',
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('İlan eklemek için giriş yapmalısınız'),
+                  const SizedBox(height: 16),
+                  FilledButton(
+                    onPressed: () => context.go('/login'),
+                    child: const Text('Giriş Yap'),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -77,6 +88,18 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
   final isOrganic = ValueNotifier<bool>(false);
   final hasCertificate = ValueNotifier<bool>(false);
   final List<File> _selectedImages = [];
+  final _startDateController = TextEditingController();
+  final _endDateController = TextEditingController();
+  final _certificateFile = ValueNotifier<File?>(null);
+
+  Future<void> _pickCertificate() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (image != null) {
+      _certificateFile.value = File(image.path);
+    }
+  }
 
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
@@ -89,30 +112,76 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
     }
   }
 
+  Future<void> _selectDate(bool isStartDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Theme.of(context).colorScheme.primary,
+              onPrimary: Theme.of(context).colorScheme.onPrimary,
+              surface: Theme.of(context).colorScheme.surface,
+              onSurface: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final formattedDate = "${picked.day}/${picked.month}/${picked.year}";
+      if (isStartDate) {
+        _startDateController.text = formattedDate;
+      } else {
+        _endDateController.text = formattedDate;
+      }
+    }
+  }
+
   Widget _buildImagePreview() {
     return Container(
       height: 120,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Theme.of(context).colorScheme.surface,
+      ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: _selectedImages.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.all(8),
               child: InkWell(
                 onTap: _pickImages,
+                borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  width: 120,
+                  width: 104,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Column(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add_photo_alternate_outlined, size: 32),
-                      SizedBox(height: 4),
-                      Text('Fotoğraf Ekle'),
+                      Icon(
+                        Icons.add_photo_alternate_outlined,
+                        size: 32,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Fotoğraf Ekle',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -122,13 +191,13 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
 
           final image = _selectedImages[index - 1];
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.all(8),
             child: Stack(
               children: [
                 Container(
-                  width: 120,
+                  width: 104,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                     image: DecorationImage(
                       image: FileImage(image),
                       fit: BoxFit.cover,
@@ -146,11 +215,21 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                     },
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.close, size: 16),
+                      child: Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ),
@@ -168,6 +247,8 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
     _descriptionController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
+    _startDateController.dispose();
+    _endDateController.dispose();
     super.dispose();
   }
 
@@ -271,184 +352,445 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
 
     return Form(
       key: _formKey,
-      child: Stack(
+      child: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              // Görsel Seçici
-              _buildImagePreview(),
-              const Gap(16),
-              // Başlık
-              TextFormField(
-                controller: _titleController,
-                enabled: !_isLoading,
-                decoration: const InputDecoration(
-                  labelText: 'Ürün Adı',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen ürün adını girin';
-                  }
-                  return null;
-                },
-              ),
-              const Gap(16),
-              // Kategori
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Kategori',
-                  border: OutlineInputBorder(),
-                ),
-                items: ProductCategory.values
-                    .map((category) => DropdownMenuItem(
-                          value: category.title,
-                          child: Text(category.title),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Lütfen bir kategori seçin';
-                  }
-                  return null;
-                },
-              ),
-              const Gap(16),
-              // Açıklama
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Açıklama',
-                  border: OutlineInputBorder(),
-                  helperText: 'Ürünün özellikleri, kalitesi, üretim yöntemi vb.',
-                ),
-                maxLines: 3,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen açıklama girin';
-                  }
-                  return null;
-                },
-              ),
-              const Gap(16),
-              // Fiyat ve Birim
-              Row(
+          // Fotoğraf Ekleme Alanı
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    flex: 2,
-                    child: TextFormField(
-                      controller: _priceController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Fiyat',
-                        border: OutlineInputBorder(),
-                        prefixText: '₺ ',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Lütfen fiyat girin';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return 'Geçerli bir fiyat girin';
-                        }
-                        return null;
-                      },
-                    ),
+                  Text(
+                    'Ürün Fotoğrafları',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  const Gap(16),
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedUnit,
-                      decoration: const InputDecoration(
-                        labelText: 'Birim',
-                        border: OutlineInputBorder(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'En az bir fotoğraf ekleyin',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildImagePreview(),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // İlan Detayları
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'İlan Detayları',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  // İlan Başlığı
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'İlan Başlığı',
+                      hintText: 'Örn: Taze Organik Domates',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      items: _units
-                          .map((unit) => DropdownMenuItem(
-                                value: unit,
-                                child: Text(unit),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedUnit = value;
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return 'Birim seçin';
-                        }
-                        return null;
-                      },
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen bir başlık girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Kategori
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'Ürün Kategorisi',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: ProductCategory.values
+                        .map((category) => DropdownMenuItem(
+                              value: category.title,
+                              child: Text(category.title),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Lütfen bir kategori seçin';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Fiyat ve Birim
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextFormField(
+                          controller: _priceController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Birim Fiyat',
+                            prefixText: '₺ ',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Fiyat gerekli';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Geçerli bir fiyat girin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedUnit,
+                          decoration: InputDecoration(
+                            labelText: 'Birim',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          items: _units
+                              .map((unit) => DropdownMenuItem(
+                                    value: unit,
+                                    child: Text(unit),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedUnit = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Birim seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Miktar
+                  TextFormField(
+                    controller: _quantityController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Toplam Miktar',
+                      suffixText: _selectedUnit,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Miktar gerekli';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'Geçerli bir miktar girin';
+                      }
+                      return null;
+                    },
                   ),
                 ],
               ),
-              const Gap(16),
-              // Miktar
-              TextFormField(
-                controller: _quantityController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Miktar',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Lütfen miktar girin';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return 'Geçerli bir miktar girin';
-                  }
-                  return null;
-                },
-              ),
-              const Gap(16),
-              // Konum
-              CityDistrictPicker(
-                cities: turkiyeIlleri, // TODO: Gerçek veriyi ekle
-                onCitySelected: (city) {
-                  setState(() {
-                    _selectedCity = city;
-                  });
-                },
-                onDistrictSelected: (district) {
-                  setState(() {
-                    _selectedDistrict = district;
-                  });
-                },
-              ),
-              const Gap(24),
-              // Gönder butonu
-              FilledButton(
-                onPressed: _isLoading ? null : _submitForm,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        ),
-                      )
-                    : const Text('İlanı Yayınla'),
-              ),
-            ],
+            ),
           ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
+          const SizedBox(height: 16),
+
+          // Konum Bilgisi
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Konum Bilgisi',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  CityDistrictPicker(
+                    selectedCity: selectedCity.value,
+                    selectedDistrict: selectedDistrict.value,
+                    cities: turkiyeIlleri,
+                    onCitySelected: (city) => selectedCity.value = city,
+                    onDistrictSelected: (district) => selectedDistrict.value = district,
+                  ),
+                ],
               ),
             ),
+          ),
+          const SizedBox(height: 16),
+
+          // Satış Tarihi
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tahmini Satış Tarihi',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _startDateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(true),
+                          decoration: InputDecoration(
+                            labelText: 'Başlangıç Tarihi',
+                            suffixIcon: const Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Başlangıç tarihi seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _endDateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(false),
+                          decoration: InputDecoration(
+                            labelText: 'Bitiş Tarihi',
+                            suffixIcon: const Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Bitiş tarihi seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Ürün Özellikleri
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Ürün Özellikleri',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: isOrganic,
+                    builder: (context, isOrganicValue, child) {
+                      return SwitchListTile(
+                        title: const Text('Organik Ürün'),
+                        value: isOrganicValue,
+                        onChanged: (value) {
+                          isOrganic.value = value;
+                          if (!value) {
+                            hasCertificate.value = false;
+                            _certificateFile.value = null;
+                          }
+                        },
+                      );
+                    },
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: isOrganic,
+                    builder: (context, isOrganicValue, child) {
+                      if (!isOrganicValue) return const SizedBox.shrink();
+                      return ValueListenableBuilder<bool>(
+                        valueListenable: hasCertificate,
+                        builder: (context, hasCertificateValue, child) {
+                          return Column(
+                            children: [
+                              SwitchListTile(
+                                title: const Text('Sertifikalı'),
+                                value: hasCertificateValue,
+                                onChanged: (value) {
+                                  hasCertificate.value = value;
+                                  if (!value) {
+                                    _certificateFile.value = null;
+                                  }
+                                },
+                              ),
+                              if (hasCertificateValue)
+                                ValueListenableBuilder<File?>(
+                                  valueListenable: _certificateFile,
+                                  builder: (context, file, child) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          if (file != null)
+                                            Stack(
+                                              children: [
+                                                Container(
+                                                  height: 120,
+                                                  width: double.infinity,
+                                                  margin: const EdgeInsets.only(bottom: 8),
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    image: DecorationImage(
+                                                      image: FileImage(file),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  top: 8,
+                                                  right: 8,
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      _certificateFile.value = null;
+                                                    },
+                                                    icon: const Icon(Icons.close),
+                                                    style: IconButton.styleFrom(
+                                                      backgroundColor: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          OutlinedButton.icon(
+                                            onPressed: _pickCertificate,
+                                            icon: const Icon(Icons.upload_file),
+                                            label: Text(file == null
+                                                ? 'Sertifika Yükle'
+                                                : 'Sertifikayı Değiştir'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Açıklama
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Açıklama',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _descriptionController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      hintText: 'Ürününüz hakkında detaylı bilgi verin...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen bir açıklama girin';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Kaydet Butonu
+          FilledButton.icon(
+            onPressed: _isLoading ? null : _submitForm,
+            icon: _isLoading
+                ? Container(
+                    width: 24,
+                    height: 24,
+                    padding: const EdgeInsets.all(2),
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  )
+                : const Icon(Icons.check),
+            label: Text(_isLoading ? 'Kaydediliyor...' : 'İlanı Yayınla'),
+          ),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -468,13 +810,14 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
-  final _locationController = TextEditingController();
   String? _selectedCategory;
   String? _selectedUnit;
-  String? _selectedCity;
-  String? _selectedDistrict;
-  bool _isLoading = false;
   final _units = ['kg', 'ton', 'adet', 'demet'];
+  final selectedCity = ValueNotifier<String?>(null);
+  final selectedDistrict = ValueNotifier<String?>(null);
+  final _startDateController = TextEditingController();
+  final _endDateController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -482,8 +825,29 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
     _descriptionController.dispose();
     _priceController.dispose();
     _quantityController.dispose();
-    _locationController.dispose();
+    _startDateController.dispose();
+    _endDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _selectDate(bool isStartDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+
+    if (picked != null) {
+      final formattedDate = "${picked.day}/${picked.month}/${picked.year}";
+      setState(() {
+        if (isStartDate) {
+          _startDateController.text = formattedDate;
+        } else {
+          _endDateController.text = formattedDate;
+        }
+      });
+    }
   }
 
   Future<void> _submitForm() async {
@@ -492,10 +856,8 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
     setState(() => _isLoading = true);
 
     try {
-      // ProductViewModel'i oluştur
       final productViewModel = ref.read(productViewModelProvider.notifier);
 
-      // İlanı ekle
       await productViewModel.addProduct(
         title: _titleController.text,
         description: _descriptionController.text,
@@ -503,18 +865,15 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
         unit: _selectedUnit!,
         quantity: double.parse(_quantityController.text),
         category: _selectedCategory!,
-        location: _selectedCity != null
-            ? _selectedDistrict != null
-                ? '$_selectedCity, $_selectedDistrict'
-                : _selectedCity
+        location: selectedCity.value != null
+            ? selectedDistrict.value != null
+                ? '${selectedCity.value}, ${selectedDistrict.value}'
+                : selectedCity.value
             : null,
       );
 
       if (mounted) {
         context.go('/market');
-      }
-
-      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Talep başarıyla eklendi'),
@@ -522,18 +881,18 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
           ),
         );
 
-        // Form'u temizle
         _formKey.currentState!.reset();
         _titleController.clear();
         _descriptionController.clear();
         _priceController.clear();
         _quantityController.clear();
-        _locationController.clear();
+        _startDateController.clear();
+        _endDateController.clear();
         setState(() {
           _selectedCategory = null;
           _selectedUnit = null;
-          _selectedCity = null;
-          _selectedDistrict = null;
+          selectedCity.value = null;
+          selectedDistrict.value = null;
         });
       }
     } catch (e) {
@@ -554,7 +913,6 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
 
   @override
   Widget build(BuildContext context) {
-    // ProductViewModel'in durumunu izle
     ref.listen<AsyncValue<void>>(productViewModelProvider, (previous, next) {
       next.whenOrNull(
         error: (error, stackTrace) {
@@ -575,167 +933,300 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Başlık
-          TextFormField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: 'Ne Arıyorsunuz?',
-              border: OutlineInputBorder(),
-              helperText: 'Örn: Organik Elma, Sofralık Domates',
+          // İlan Detayları
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'İlan Detayları',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  // İlan Başlığı
+                  TextFormField(
+                    controller: _titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Ne Arıyorsunuz?',
+                      hintText: 'Örn: Organik Elma, Sofralık Domates',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen aradığınız ürünü girin';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Kategori
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'Ürün Kategorisi',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    items: ProductCategory.values
+                        .map((category) => DropdownMenuItem(
+                              value: category.title,
+                              child: Text(category.title),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return 'Lütfen bir kategori seçin';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Fiyat ve Birim
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: TextFormField(
+                          controller: _priceController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: 'Teklif Ettiğiniz Fiyat',
+                            prefixText: '₺ ',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Fiyat gerekli';
+                            }
+                            if (double.tryParse(value) == null) {
+                              return 'Geçerli bir fiyat girin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedUnit,
+                          decoration: InputDecoration(
+                            labelText: 'Birim',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          items: _units
+                              .map((unit) => DropdownMenuItem(
+                                    value: unit,
+                                    child: Text(unit),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedUnit = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Birim seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Miktar
+                  TextFormField(
+                    controller: _quantityController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'İhtiyaç Duyduğunuz Miktar',
+                      suffixText: _selectedUnit,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Miktar gerekli';
+                      }
+                      if (double.tryParse(value) == null) {
+                        return 'Geçerli bir miktar girin';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Lütfen aradığınız ürünü girin';
-              }
-              return null;
-            },
           ),
-          const Gap(16),
-          // Kategori
-          DropdownButtonFormField<String>(
-            value: _selectedCategory,
-            decoration: const InputDecoration(
-              labelText: 'Kategori',
-              border: OutlineInputBorder(),
+          const SizedBox(height: 16),
+
+          // Konum Bilgisi
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Konum Bilgisi',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  CityDistrictPicker(
+                    selectedCity: selectedCity.value,
+                    selectedDistrict: selectedDistrict.value,
+                    cities: turkiyeIlleri,
+                    onCitySelected: (city) => selectedCity.value = city,
+                    onDistrictSelected: (district) => selectedDistrict.value = district,
+                  ),
+                ],
+              ),
             ),
-            items: ProductCategory.values
-                .map((category) => DropdownMenuItem(
-                      value: category.title,
-                      child: Text(category.title),
-                    ))
-                .toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedCategory = value;
-              });
-            },
-            validator: (value) {
-              if (value == null) {
-                return 'Lütfen bir kategori seçin';
-              }
-              return null;
-            },
           ),
-          const Gap(16),
+          const SizedBox(height: 16),
+
+          // Talep Tarihi
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Talep Tarihi',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _startDateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(true),
+                          decoration: InputDecoration(
+                            labelText: 'Başlangıç Tarihi',
+                            suffixIcon: const Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Başlangıç tarihi seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _endDateController,
+                          readOnly: true,
+                          onTap: () => _selectDate(false),
+                          decoration: InputDecoration(
+                            labelText: 'Bitiş Tarihi',
+                            suffixIcon: const Icon(Icons.calendar_today),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Bitiş tarihi seçin';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
           // Açıklama
-          TextFormField(
-            controller: _descriptionController,
-            decoration: const InputDecoration(
-              labelText: 'Açıklama',
-              border: OutlineInputBorder(),
-              helperText: 'Aradığınız ürünün özellikleri, kalitesi vb.',
-            ),
-            maxLines: 3,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Lütfen açıklama girin';
-              }
-              return null;
-            },
-          ),
-          const Gap(16),
-          // Fiyat ve Birim
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: TextFormField(
-                  controller: _priceController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Teklif Ettiğiniz Fiyat',
-                    border: OutlineInputBorder(),
-                    prefixText: '₺ ',
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Açıklama',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Lütfen fiyat girin';
-                    }
-                    if (double.tryParse(value) == null) {
-                      return 'Geçerli bir fiyat girin';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const Gap(16),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: _selectedUnit,
-                  decoration: const InputDecoration(
-                    labelText: 'Birim',
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _descriptionController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      hintText: 'Aradığınız ürünün özellikleri, kalitesi, özel istekleriniz...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Lütfen bir açıklama girin';
+                      }
+                      return null;
+                    },
                   ),
-                  items: _units
-                      .map((unit) => DropdownMenuItem(
-                            value: unit,
-                            child: Text(unit),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedUnit = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Birim seçin';
-                    }
-                    return null;
-                  },
-                ),
+                ],
               ),
-            ],
-          ),
-          const Gap(16),
-          // Miktar
-          TextFormField(
-            controller: _quantityController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'İhtiyaç Duyduğunuz Miktar',
-              border: OutlineInputBorder(),
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Lütfen miktar girin';
-              }
-              if (double.tryParse(value) == null) {
-                return 'Geçerli bir miktar girin';
-              }
-              return null;
-            },
           ),
-          const Gap(16),
-          // Konum
-          CityDistrictPicker(
-            cities: turkiyeIlleri,
-            onCitySelected: (city) {
-              setState(() {
-                _selectedCity = city;
-              });
-            },
-            onDistrictSelected: (district) {
-              setState(() {
-                _selectedDistrict = district;
-              });
-            },
-          ),
-          const Gap(24),
-          // Gönder butonu
-          FilledButton(
+          const SizedBox(height: 24),
+
+          // Kaydet Butonu
+          FilledButton.icon(
             onPressed: _isLoading ? null : _submitForm,
-            child: _isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            icon: _isLoading
+                ? Container(
+                    width: 24,
+                    height: 24,
+                    padding: const EdgeInsets.all(2),
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
                     ),
                   )
-                : const Text('Talebi Yayınla'),
+                : const Icon(Icons.check),
+            label: Text(_isLoading ? 'Kaydediliyor...' : 'Talebi Yayınla'),
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );
