@@ -32,8 +32,10 @@ mixin _$ProductModel {
   String get sellerName => throw _privateConstructorUsedError;
   String? get location => throw _privateConstructorUsedError;
   bool get isActive => throw _privateConstructorUsedError;
-  bool get isSellOffer =>
-      throw _privateConstructorUsedError; // true: satış ilanı, false: alım ilanı
+  bool get isSellOffer => throw _privateConstructorUsedError;
+  bool get isOrganic => throw _privateConstructorUsedError;
+  bool get hasCertificate => throw _privateConstructorUsedError;
+  List<String> get images => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -67,6 +69,9 @@ abstract class $ProductModelCopyWith<$Res> {
     String? location,
     bool isActive,
     bool isSellOffer,
+    bool isOrganic,
+    bool hasCertificate,
+    List<String> images,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -99,6 +104,9 @@ class _$ProductModelCopyWithImpl<$Res, $Val extends ProductModel>
     Object? location = freezed,
     Object? isActive = null,
     Object? isSellOffer = null,
+    Object? isOrganic = null,
+    Object? hasCertificate = null,
+    Object? images = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -152,6 +160,18 @@ class _$ProductModelCopyWithImpl<$Res, $Val extends ProductModel>
                 ? _value.isSellOffer
                 : isSellOffer // ignore: cast_nullable_to_non_nullable
                       as bool,
+            isOrganic: null == isOrganic
+                ? _value.isOrganic
+                : isOrganic // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            hasCertificate: null == hasCertificate
+                ? _value.hasCertificate
+                : hasCertificate // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            images: null == images
+                ? _value.images
+                : images // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -188,6 +208,9 @@ abstract class _$$ProductModelImplCopyWith<$Res>
     String? location,
     bool isActive,
     bool isSellOffer,
+    bool isOrganic,
+    bool hasCertificate,
+    List<String> images,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -219,6 +242,9 @@ class __$$ProductModelImplCopyWithImpl<$Res>
     Object? location = freezed,
     Object? isActive = null,
     Object? isSellOffer = null,
+    Object? isOrganic = null,
+    Object? hasCertificate = null,
+    Object? images = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -272,6 +298,18 @@ class __$$ProductModelImplCopyWithImpl<$Res>
             ? _value.isSellOffer
             : isSellOffer // ignore: cast_nullable_to_non_nullable
                   as bool,
+        isOrganic: null == isOrganic
+            ? _value.isOrganic
+            : isOrganic // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        hasCertificate: null == hasCertificate
+            ? _value.hasCertificate
+            : hasCertificate // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        images: null == images
+            ? _value._images
+            : images // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -299,11 +337,15 @@ class _$ProductModelImpl extends _ProductModel {
     required this.sellerId,
     required this.sellerName,
     this.location,
-    this.isActive = false,
+    this.isActive = true,
     this.isSellOffer = true,
+    this.isOrganic = false,
+    this.hasCertificate = false,
+    final List<String> images = const [],
     this.createdAt,
     this.updatedAt,
-  }) : super._();
+  }) : _images = images,
+       super._();
 
   factory _$ProductModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProductModelImplFromJson(json);
@@ -334,7 +376,21 @@ class _$ProductModelImpl extends _ProductModel {
   @override
   @JsonKey()
   final bool isSellOffer;
-  // true: satış ilanı, false: alım ilanı
+  @override
+  @JsonKey()
+  final bool isOrganic;
+  @override
+  @JsonKey()
+  final bool hasCertificate;
+  final List<String> _images;
+  @override
+  @JsonKey()
+  List<String> get images {
+    if (_images is EqualUnmodifiableListView) return _images;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_images);
+  }
+
   @override
   final DateTime? createdAt;
   @override
@@ -342,7 +398,7 @@ class _$ProductModelImpl extends _ProductModel {
 
   @override
   String toString() {
-    return 'ProductModel(id: $id, title: $title, description: $description, price: $price, unit: $unit, quantity: $quantity, category: $category, sellerId: $sellerId, sellerName: $sellerName, location: $location, isActive: $isActive, isSellOffer: $isSellOffer, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ProductModel(id: $id, title: $title, description: $description, price: $price, unit: $unit, quantity: $quantity, category: $category, sellerId: $sellerId, sellerName: $sellerName, location: $location, isActive: $isActive, isSellOffer: $isSellOffer, isOrganic: $isOrganic, hasCertificate: $hasCertificate, images: $images, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -370,6 +426,11 @@ class _$ProductModelImpl extends _ProductModel {
                 other.isActive == isActive) &&
             (identical(other.isSellOffer, isSellOffer) ||
                 other.isSellOffer == isSellOffer) &&
+            (identical(other.isOrganic, isOrganic) ||
+                other.isOrganic == isOrganic) &&
+            (identical(other.hasCertificate, hasCertificate) ||
+                other.hasCertificate == hasCertificate) &&
+            const DeepCollectionEquality().equals(other._images, _images) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -392,6 +453,9 @@ class _$ProductModelImpl extends _ProductModel {
     location,
     isActive,
     isSellOffer,
+    isOrganic,
+    hasCertificate,
+    const DeepCollectionEquality().hash(_images),
     createdAt,
     updatedAt,
   );
@@ -424,6 +488,9 @@ abstract class _ProductModel extends ProductModel {
     final String? location,
     final bool isActive,
     final bool isSellOffer,
+    final bool isOrganic,
+    final bool hasCertificate,
+    final List<String> images,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$ProductModelImpl;
@@ -455,7 +522,13 @@ abstract class _ProductModel extends ProductModel {
   @override
   bool get isActive;
   @override
-  bool get isSellOffer; // true: satış ilanı, false: alım ilanı
+  bool get isSellOffer;
+  @override
+  bool get isOrganic;
+  @override
+  bool get hasCertificate;
+  @override
+  List<String> get images;
   @override
   DateTime? get createdAt;
   @override

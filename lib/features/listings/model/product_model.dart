@@ -21,6 +21,9 @@ class ProductModel with _$ProductModel {
     String? location,
     @Default(true) bool isActive,
     @Default(true) bool isSellOffer,
+    @Default(false) bool isOrganic,
+    @Default(false) bool hasCertificate,
+    @Default([]) List<String> images,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) = _ProductModel;
@@ -46,6 +49,9 @@ class ProductModel with _$ProductModel {
       location: data['location'] as String?,
       isActive: data['isActive'] as bool? ?? true,
       isSellOffer: data['isSellOffer'] as bool? ?? true,
+      isOrganic: data['isOrganic'] as bool? ?? false,
+      hasCertificate: data['hasCertificate'] as bool? ?? false,
+      images: (data['images'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
     );
@@ -64,6 +70,9 @@ class ProductModel with _$ProductModel {
       'location': location,
       'isActive': isActive,
       'isSellOffer': isSellOffer,
+      'isOrganic': isOrganic,
+      'hasCertificate': hasCertificate,
+      'images': images,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : FieldValue.serverTimestamp(),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : FieldValue.serverTimestamp(),
     };

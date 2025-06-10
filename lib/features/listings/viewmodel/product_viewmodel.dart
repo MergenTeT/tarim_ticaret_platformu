@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/enums/user_role.dart';
 import '../../../features/auth/viewmodel/auth_viewmodel.dart';
 import '../model/product_model.dart';
-import '../service/product_service.dart';
+import '../../../core/services/product_service.dart';
 
-final productServiceProvider = Provider((ref) => ProductService());
+final productServiceProvider = Provider<ProductService>((ref) => ProductService());
 
 final productsProvider = StreamProvider<List<ProductModel>>((ref) {
   final productService = ref.watch(productServiceProvider);
-  return productService.getAllProducts();
+  return productService.getProducts();
 });
 
 final productsByCategoryProvider = StreamProvider.family<List<ProductModel>, String>((ref, category) {
@@ -27,13 +27,11 @@ final searchProductsProvider = StreamProvider.family<List<ProductModel>, String>
   return productService.searchProducts(query);
 });
 
-final productViewModelProvider = StateNotifierProvider.autoDispose<ProductViewModel, AsyncValue<void>>((ref) {
-  final productService = ref.watch(productServiceProvider);
+final productViewModelProvider = StateNotifierProvider<ProductViewModel, AsyncValue<void>>((ref) {
   final authState = ref.watch(authViewModelProvider);
-  
   return authState.when(
     data: (user) => ProductViewModel(
-      productService,
+      ref.watch(productServiceProvider),
       user.id,
       user.name,
       user.primaryRole,
@@ -56,7 +54,7 @@ class ProductViewModel extends StateNotifier<AsyncValue<void>> {
     this._userRole,
   ) : super(const AsyncValue.data(null));
 
-  Future<void> addProduct({
+  Future<String?> addProduct({
     required String title,
     required String description,
     required double price,
@@ -64,6 +62,9 @@ class ProductViewModel extends StateNotifier<AsyncValue<void>> {
     required double quantity,
     required String category,
     String? location,
+    bool isOrganic = false,
+    bool hasCertificate = false,
+    List<String> images = const [],
   }) async {
     try {
       state = const AsyncValue.loading();
@@ -81,16 +82,21 @@ class ProductViewModel extends StateNotifier<AsyncValue<void>> {
         sellerName: _sellerName,
         location: location,
         isActive: true,
-        isSellOffer: _userRole == UserRole.farmer, // Çiftçi ise satış ilanı, alıcı ise alım ilanı
+        isSellOffer: _userRole == UserRole.farmer,
+        isOrganic: isOrganic,
+        hasCertificate: hasCertificate,
+        images: images,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
       // Firestore'a kaydet
-      await _productService.addProduct(product);
+      final productId = await _productService.addProduct(product);
       state = const AsyncValue.data(null);
+      return productId;
     } catch (error, stackTrace) {
       state = AsyncValue.error(error, stackTrace);
+      return null;
     }
   }
 

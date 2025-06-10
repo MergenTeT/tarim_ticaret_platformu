@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart' as path;
 
 class LocalStorageService {
   static final LocalStorageService _instance = LocalStorageService._internal();
@@ -61,30 +62,70 @@ class LocalStorageService {
   }
 
   // Görsel kaydetme
-  Future<String> saveImage(File imageFile, String productId) async {
-    final String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final Directory appDir = await getApplicationDocumentsDirectory();
-    final String localPath = join(appDir.path, 'product_images', fileName);
-
-    // Dizin oluştur
-    final imageDir = Directory(dirname(localPath));
-    if (!await imageDir.exists()) {
-      await imageDir.create(recursive: true);
+  Future<String> saveImage(File imageFile) async {
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final String fileName = '${DateTime.now().millisecondsSinceEpoch}${path.extension(imageFile.path)}';
+      final String localPath = path.join(appDir.path, 'images', fileName);
+      
+      // images klasörünü oluştur
+      final Directory imageDir = Directory(path.join(appDir.path, 'images'));
+      if (!await imageDir.exists()) {
+        await imageDir.create(recursive: true);
+      }
+      
+      // Görseli kopyala
+      final File localImage = await imageFile.copy(localPath);
+      return localImage.path;
+    } catch (e) {
+      throw Exception('Görsel kaydedilemedi: $e');
     }
+  }
 
-    // Görseli kopyala
-    await imageFile.copy(localPath);
+  // Birden fazla görseli kaydet
+  Future<List<String>> saveMultipleImages(List<File> imageFiles) async {
+    try {
+      List<String> localPaths = [];
+      for (File imageFile in imageFiles) {
+        String localPath = await saveImage(imageFile);
+        localPaths.add(localPath);
+      }
+      return localPaths;
+    } catch (e) {
+      throw Exception('Görseller kaydedilemedi: $e');
+    }
+  }
 
-    // Veritabanına kaydet
-    final db = await database;
-    await db.insert('images', {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'product_id': productId,
-      'path': localPath,
-      'created_at': DateTime.now().millisecondsSinceEpoch,
-    });
+  // Görsel silme
+  Future<void> deleteImage(String imagePath) async {
+    try {
+      final File file = File(imagePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      throw Exception('Görsel silinemedi: $e');
+    }
+  }
 
-    return localPath;
+  // Tüm görselleri getir
+  Future<List<String>> getAllImages() async {
+    try {
+      final Directory appDir = await getApplicationDocumentsDirectory();
+      final Directory imageDir = Directory(path.join(appDir.path, 'images'));
+      
+      if (!await imageDir.exists()) {
+        return [];
+      }
+      
+      final List<FileSystemEntity> entities = await imageDir.list().toList();
+      return entities
+          .whereType<File>()
+          .map((file) => file.path)
+          .toList();
+    } catch (e) {
+      throw Exception('Görseller getirilemedi: $e');
+    }
   }
 
   // Ürün görselleri getirme
@@ -98,21 +139,6 @@ class LocalStorageService {
     );
 
     return List.generate(maps.length, (i) => maps[i]['path'] as String);
-  }
-
-  // Görsel silme
-  Future<void> deleteImage(String imagePath) async {
-    final file = File(imagePath);
-    if (await file.exists()) {
-      await file.delete();
-    }
-
-    final db = await database;
-    await db.delete(
-      'images',
-      where: 'path = ?',
-      whereArgs: [imagePath],
-    );
   }
 
   // Ürünle ilgili tüm görselleri silme

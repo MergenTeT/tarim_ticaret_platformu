@@ -12,6 +12,7 @@ class MarketView extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    debugPrint('MarketView: build çağrıldı');
     final productsState = ref.watch(productsProvider);
     final selectedCategory = ref.watch(selectedCategoryProvider);
 
@@ -73,12 +74,13 @@ class MarketView extends HookConsumerWidget {
           Expanded(
             child: productsState.when(
               data: (products) {
-                debugPrint('Ürünler yüklendi: ${products.length} adet');
+                debugPrint('MarketView: Ürünler yüklendi. Toplam: ${products.length}');
                 products.forEach((product) {
-                  debugPrint('Ürün: ${product.title} - Aktif: ${product.isActive}');
+                  debugPrint('MarketView: Ürün: ${product.title} - ID: ${product.id}');
                 });
 
                 if (products.isEmpty) {
+                  debugPrint('MarketView: Ürün listesi boş');
                   return const Center(
                     child: Text('Henüz ilan bulunmuyor'),
                   );
@@ -90,13 +92,17 @@ class MarketView extends HookConsumerWidget {
                     : products;
 
                 if (filteredProducts.isEmpty) {
+                  debugPrint('MarketView: Filtrelenmiş ürün listesi boş');
                   return const Center(
                     child: Text('Bu kategoride ilan bulunmuyor'),
                   );
                 }
 
+                debugPrint('MarketView: Filtrelenmiş ürün sayısı: ${filteredProducts.length}');
+
                 return RefreshIndicator(
                   onRefresh: () async {
+                    debugPrint('MarketView: Yenileme yapılıyor');
                     ref.invalidate(productsProvider);
                   },
                   child: GridView.builder(
@@ -115,12 +121,15 @@ class MarketView extends HookConsumerWidget {
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () {
+                debugPrint('MarketView: Ürünler yükleniyor');
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
               error: (error, stackTrace) {
-                debugPrint('Hata: $error');
-                debugPrint('Stack trace: $stackTrace');
+                debugPrint('MarketView: Hata oluştu: $error');
+                debugPrint('MarketView: Stack trace: $stackTrace');
                 return Center(
                   child: Text('Hata: $error'),
                 );

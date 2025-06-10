@@ -18,8 +18,15 @@ _$ProductModelImpl _$$ProductModelImplFromJson(Map<String, dynamic> json) =>
       sellerId: json['sellerId'] as String,
       sellerName: json['sellerName'] as String,
       location: json['location'] as String?,
-      isActive: json['isActive'] as bool? ?? false,
+      isActive: json['isActive'] as bool? ?? true,
       isSellOffer: json['isSellOffer'] as bool? ?? true,
+      isOrganic: json['isOrganic'] as bool? ?? false,
+      hasCertificate: json['hasCertificate'] as bool? ?? false,
+      images:
+          (json['images'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt'] as String),
@@ -42,6 +49,9 @@ Map<String, dynamic> _$$ProductModelImplToJson(_$ProductModelImpl instance) =>
       'location': instance.location,
       'isActive': instance.isActive,
       'isSellOffer': instance.isSellOffer,
+      'isOrganic': instance.isOrganic,
+      'hasCertificate': instance.hasCertificate,
+      'images': instance.images,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

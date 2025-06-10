@@ -25,4 +25,4 @@ service cloud.firestore {
         isOwner(resource.data.sellerId); // Sadece ilan sahibi güncelleyebilir/silebilir
     }
   }
-} 
+}
