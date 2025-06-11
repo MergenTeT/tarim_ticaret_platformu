@@ -870,6 +870,9 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
                 ? '${selectedCity.value}, ${selectedDistrict.value}'
                 : selectedCity.value
             : null,
+        isOrganic: false,
+        hasCertificate: false,
+        images: const [],
       );
 
       if (mounted) {
