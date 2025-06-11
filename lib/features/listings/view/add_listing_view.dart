@@ -359,10 +359,10 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
           Card(
             margin: EdgeInsets.zero,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            children: [
                   Text(
                     'Ürün Fotoğrafları',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -377,7 +377,7 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                         ),
                   ),
                   const SizedBox(height: 16),
-                  _buildImagePreview(),
+              _buildImagePreview(),
                 ],
               ),
             ),
@@ -400,130 +400,130 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                   ),
                   const SizedBox(height: 16),
                   // İlan Başlığı
-                  TextFormField(
-                    controller: _titleController,
+              TextFormField(
+                controller: _titleController,
                     decoration: InputDecoration(
                       labelText: 'İlan Başlığı',
                       hintText: 'Örn: Taze Organik Domates',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                         return 'Lütfen bir başlık girin';
-                      }
-                      return null;
-                    },
-                  ),
+                  }
+                  return null;
+                },
+              ),
                   const SizedBox(height: 16),
-                  // Kategori
-                  DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+              // Kategori
+              DropdownButtonFormField<String>(
+                value: _selectedCategory,
                     decoration: InputDecoration(
                       labelText: 'Ürün Kategorisi',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    items: ProductCategory.values
-                        .map((category) => DropdownMenuItem(
-                              value: category.title,
-                              child: Text(category.title),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Lütfen bir kategori seçin';
-                      }
-                      return null;
-                    },
-                  ),
+                ),
+                items: ProductCategory.values
+                    .map((category) => DropdownMenuItem(
+                          value: category.title,
+                          child: Text(category.title),
+                        ))
+                    .toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Lütfen bir kategori seçin';
+                  }
+                  return null;
+                },
+              ),
                   const SizedBox(height: 16),
-                  // Fiyat ve Birim
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: _priceController,
-                          keyboardType: TextInputType.number,
+              // Fiyat ve Birim
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextFormField(
+                      controller: _priceController,
+                      keyboardType: TextInputType.number,
                           decoration: InputDecoration(
                             labelText: 'Birim Fiyat',
-                            prefixText: '₺ ',
+                        prefixText: '₺ ',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
                               return 'Fiyat gerekli';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Geçerli bir fiyat girin';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
+                        }
+                        if (double.tryParse(value) == null) {
+                          return 'Geçerli bir fiyat girin';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
                       const SizedBox(width: 16),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedUnit,
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedUnit,
                           decoration: InputDecoration(
-                            labelText: 'Birim',
+                        labelText: 'Birim',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          items: _units
-                              .map((unit) => DropdownMenuItem(
-                                    value: unit,
-                                    child: Text(unit),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedUnit = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Birim seçin';
-                            }
-                            return null;
-                          },
-                        ),
                       ),
-                    ],
+                      items: _units
+                          .map((unit) => DropdownMenuItem(
+                                value: unit,
+                                child: Text(unit),
+                              ))
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedUnit = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return 'Birim seçin';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
+                ],
+              ),
                   const SizedBox(height: 16),
-                  // Miktar
-                  TextFormField(
-                    controller: _quantityController,
-                    keyboardType: TextInputType.number,
+              // Miktar
+              TextFormField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: 'Toplam Miktar',
                       suffixText: _selectedUnit,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                         return 'Miktar gerekli';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Geçerli bir miktar girin';
-                      }
-                      return null;
-                    },
-                  ),
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Geçerli bir miktar girin';
+                  }
+                  return null;
+                },
+              ),
                 ],
               ),
             ),
@@ -545,7 +545,7 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                         ),
                   ),
                   const SizedBox(height: 16),
-                  CityDistrictPicker(
+              CityDistrictPicker(
                     selectedCity: selectedCity.value,
                     selectedDistrict: selectedDistrict.value,
                     cities: turkiyeIlleri,
@@ -555,7 +555,7 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                 ],
               ),
             ),
-          ),
+              ),
           const SizedBox(height: 16),
 
           // Satış Tarihi
@@ -606,7 +606,7 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                             suffixIcon: const Icon(Icons.calendar_today),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                            ),
+                        ),
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -617,9 +617,9 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                         ),
                       ),
                     ],
-                  ),
-                ],
               ),
+            ],
+          ),
             ),
           ),
           const SizedBox(height: 16),
@@ -686,7 +686,7 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                                           if (file != null)
                                             Stack(
                                               children: [
-                                                Container(
+            Container(
                                                   height: 120,
                                                   width: double.infinity,
                                                   margin: const EdgeInsets.only(bottom: 8),
@@ -719,10 +719,10 @@ class _FarmerListingFormState extends ConsumerState<FarmerListingForm> {
                                             label: Text(file == null
                                                 ? 'Sertifika Yükle'
                                                 : 'Sertifikayı Değiştir'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
+            ),
+        ],
+      ),
+    );
                                   },
                                 ),
                             ],
@@ -952,130 +952,130 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
                   ),
                   const SizedBox(height: 16),
                   // İlan Başlığı
-                  TextFormField(
-                    controller: _titleController,
+          TextFormField(
+            controller: _titleController,
                     decoration: InputDecoration(
-                      labelText: 'Ne Arıyorsunuz?',
+              labelText: 'Ne Arıyorsunuz?',
                       hintText: 'Örn: Organik Elma, Sofralık Domates',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Lütfen aradığınız ürünü girin';
-                      }
-                      return null;
-                    },
-                  ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Lütfen aradığınız ürünü girin';
+              }
+              return null;
+            },
+          ),
                   const SizedBox(height: 16),
-                  // Kategori
-                  DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+          // Kategori
+          DropdownButtonFormField<String>(
+            value: _selectedCategory,
                     decoration: InputDecoration(
                       labelText: 'Ürün Kategorisi',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    items: ProductCategory.values
-                        .map((category) => DropdownMenuItem(
-                              value: category.title,
-                              child: Text(category.title),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Lütfen bir kategori seçin';
-                      }
-                      return null;
-                    },
-                  ),
+            ),
+            items: ProductCategory.values
+                .map((category) => DropdownMenuItem(
+                      value: category.title,
+                      child: Text(category.title),
+                    ))
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                _selectedCategory = value;
+              });
+            },
+            validator: (value) {
+              if (value == null) {
+                return 'Lütfen bir kategori seçin';
+              }
+              return null;
+            },
+          ),
                   const SizedBox(height: 16),
-                  // Fiyat ve Birim
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: _priceController,
-                          keyboardType: TextInputType.number,
+          // Fiyat ve Birim
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextFormField(
+                  controller: _priceController,
+                  keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            labelText: 'Teklif Ettiğiniz Fiyat',
-                            prefixText: '₺ ',
+                    labelText: 'Teklif Ettiğiniz Fiyat',
+                    prefixText: '₺ ',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
                               return 'Fiyat gerekli';
-                            }
-                            if (double.tryParse(value) == null) {
-                              return 'Geçerli bir fiyat girin';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Geçerli bir fiyat girin';
+                    }
+                    return null;
+                  },
+                ),
+              ),
                       const SizedBox(width: 16),
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedUnit,
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: _selectedUnit,
                           decoration: InputDecoration(
-                            labelText: 'Birim',
+                    labelText: 'Birim',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                          ),
-                          items: _units
-                              .map((unit) => DropdownMenuItem(
-                                    value: unit,
-                                    child: Text(unit),
-                                  ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedUnit = value;
-                            });
-                          },
-                          validator: (value) {
-                            if (value == null) {
-                              return 'Birim seçin';
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
                   ),
+                  items: _units
+                      .map((unit) => DropdownMenuItem(
+                            value: unit,
+                            child: Text(unit),
+                          ))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedUnit = value;
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return 'Birim seçin';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
                   const SizedBox(height: 16),
-                  // Miktar
-                  TextFormField(
-                    controller: _quantityController,
-                    keyboardType: TextInputType.number,
+          // Miktar
+          TextFormField(
+            controller: _quantityController,
+            keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'İhtiyaç Duyduğunuz Miktar',
+              labelText: 'İhtiyaç Duyduğunuz Miktar',
                       suffixText: _selectedUnit,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
                         return 'Miktar gerekli';
-                      }
-                      if (double.tryParse(value) == null) {
-                        return 'Geçerli bir miktar girin';
-                      }
-                      return null;
-                    },
-                  ),
+              }
+              if (double.tryParse(value) == null) {
+                return 'Geçerli bir miktar girin';
+              }
+              return null;
+            },
+          ),
                 ],
               ),
             ),
@@ -1097,10 +1097,10 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
                         ),
                   ),
                   const SizedBox(height: 16),
-                  CityDistrictPicker(
+          CityDistrictPicker(
                     selectedCity: selectedCity.value,
                     selectedDistrict: selectedDistrict.value,
-                    cities: turkiyeIlleri,
+            cities: turkiyeIlleri,
                     onCitySelected: (city) => selectedCity.value = city,
                     onDistrictSelected: (district) => selectedDistrict.value = district,
                   ),
@@ -1144,7 +1144,7 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
                               return 'Başlangıç tarihi seçin';
                             }
                             return null;
-                          },
+            },
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -1205,7 +1205,7 @@ class _BuyerListingFormState extends ConsumerState<BuyerListingForm> {
                         return 'Lütfen bir açıklama girin';
                       }
                       return null;
-                    },
+            },
                   ),
                 ],
               ),

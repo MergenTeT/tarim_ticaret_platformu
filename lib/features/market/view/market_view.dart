@@ -8,6 +8,8 @@ import '../../../features/listings/viewmodel/product_viewmodel.dart';
 import '../../../features/listings/model/product_model.dart';
 import '../../../core/base/base_view.dart';
 import 'filter_bottom_sheet.dart';
+import '../../roles/widgets/role_selector.dart';
+import '../widgets/animated_welcome_banner.dart';
 
 class MarketView extends HookConsumerWidget {
   const MarketView({super.key});
@@ -33,73 +35,43 @@ class MarketView extends HookConsumerWidget {
       return null;
     }, [selectedCategory]);
 
-    return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // Sabit başlık
-          SliverAppBar(
-            pinned: true,
-            title: const Text('Tarımın Dijital Pazarı'),
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_outlined),
-              ),
-            ],
+    return BaseView(
+      title: 'Tarımın Dijital Pazarı',
+      titleWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Tarımın Dijital Pazarı',
+            style: Theme.of(context).textTheme.titleLarge,
           ),
-
+          const Gap(12),
+          const RoleSelector(),
+        ],
+      ),
+      child: CustomScrollView(
+        slivers: [
           // Kaydırılabilir içerik
           SliverAppBar(
-            expandedHeight: 240, // Yüksekliği artırdık
+            expandedHeight: 240,
             floating: true,
             snap: true,
             automaticallyImplyLeading: false,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             flexibleSpace: FlexibleSpaceBar(
-              background: SingleChildScrollView( // SingleChildScrollView ekledik
+              background: SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    // Hoş geldiniz banner'ı
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(context).colorScheme.primary,
-                            Theme.of(context).colorScheme.primaryContainer,
-                          ],
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Tarımın Dijital Pazarına\nHoş Geldiniz',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          const Gap(8),
-                          Text(
-                            'Taze, organik ve yerel ürünler burada!',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    // Animasyonlu hoş geldiniz banner'ı
+                    const AnimatedWelcomeBanner(),
 
                     // Arama ve Filtreleme
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                       child: Column(
                         children: [
                           // Arama çubuğu
                           TextField(
-                            controller: searchController,
                             decoration: InputDecoration(
                               hintText: 'Ürün ara...',
                               prefixIcon: const Icon(Icons.search),
@@ -108,24 +80,21 @@ class MarketView extends HookConsumerWidget {
                               ),
                               filled: true,
                               fillColor: Theme.of(context).colorScheme.surface,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 12,
+                              ),
                             ),
-                            onChanged: (value) {
-                              ref.read(searchQueryProvider.notifier).state = value;
-                            },
                           ),
-                          const Gap(16),
-
+                          const Gap(8),
                           // Filtreleme butonu
-                          FilledButton.tonalIcon(
-                            onPressed: () {
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (context) => const FilterBottomSheet(),
-                              );
-                            },
-                            icon: const Icon(Icons.filter_list),
-                            label: const Text('Gelişmiş Filtreleme'),
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton.tonalIcon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.filter_list),
+                              label: const Text('Gelişmiş Filtreleme'),
+                            ),
                           ),
                         ],
                       ),
@@ -262,8 +231,8 @@ class MarketView extends HookConsumerWidget {
 
           // İlan listesi
           productsState.when(
-            data: (products) {
-              if (products.isEmpty) {
+              data: (products) {
+                if (products.isEmpty) {
                 return SliverFillRemaining(
                   child: Center(
                     child: Column(
@@ -288,13 +257,13 @@ class MarketView extends HookConsumerWidget {
               }
 
               return SliverPadding(
-                padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
-                    childAspectRatio: 0.75,
+                      childAspectRatio: 0.75,
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) => ProductCard(product: products[index]),
@@ -518,11 +487,11 @@ class FilterBottomSheet extends HookConsumerWidget {
                             ref.read(priceRangeProvider.notifier).state = RangeValues(
                               priceRange.start,
                               max,
-                            );
-                          },
-                        ),
-                      ),
-                    ],
+                );
+              },
+            ),
+          ),
+        ],
                   ),
                   const Gap(8),
                   RangeSlider(

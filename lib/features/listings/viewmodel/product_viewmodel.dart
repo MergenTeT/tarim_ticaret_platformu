@@ -229,7 +229,7 @@ class ProductViewModel extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(error, stackTrace);
     }
   }
-}
+} 
 
 final productViewModelProvider = StateNotifierProvider<ProductViewModel, AsyncValue<void>>((ref) {
   final authState = ref.watch(authViewModelProvider);
